@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หมากรุกสามมิติ | Chess 3D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+      }
+    }
+    </script>
+</head>
+
+<body>
+    <div id="scene"></div>
+
+    <header id="topbar">
+        <div class="brand">♞ หมากรุกสามมิติ</div>
+        <div id="turn-indicator" class="turn">
+            <span class="dot" id="turn-dot"></span>
+            <span id="turn-text">ตาของฝ่ายขาว</span>
+        </div>
+        <div class="actions">
+            <button id="btn-hint" class="btn ghost" title="ขอคำแนะนำตาเดิน">💡 คำแนะนำ</button>
+            <button id="btn-undo" class="btn ghost" title="ย้อนตาเดินล่าสุด">↶ ย้อนกลับ</button>
+            <button id="btn-flip" class="btn ghost" title="สลับมุมมองกระดาน">⟳ หมุนกระดาน</button>
+            <button id="btn-menu" class="btn">☰ เมนู</button>
+        </div>
+    </header>
+
+    <aside id="sidebar">
+        <section class="panel">
+            <h3>สถานะเกม</h3>
+            <div class="stat-row"><span>โหมด</span><b id="stat-mode">-</b></div>
+            <div class="stat-row"><span>ตาที่</span><b id="stat-move">1</b></div>
+            <div class="stat-row" id="row-limit" hidden>
+                <span>จำกัดตาเดินท้ายเกม</span><b id="stat-limit">-</b>
+            </div>
+            <div id="status-msg" class="status-msg"></div>
+        </section>
+
+        <section class="panel" id="panel-captured">
+            <h3>หมากที่ถูกกิน</h3>
+            <div class="captured-row">
+                <span class="side-label">ขาวกินได้</span>
+                <div id="cap-by-white" class="glyphs"></div>
+            </div>
+            <div class="captured-row">
+                <span class="side-label">ดำกินได้</span>
+                <div id="cap-by-black" class="glyphs"></div>
+            </div>
+            <div class="stat-row"><span>แต้มได้เปรียบ</span><b id="material-diff">เสมอกัน</b></div>
+        </section>
+
+        <section class="panel grow">
+            <h3>บันทึกตาเดิน</h3>
+            <ol id="move-list" class="move-list"></ol>
+        </section>
+    </aside>
+
+    <aside id="tutorial-panel" hidden>
+        <header>
+            <h3>📘 โหมดเรียนรู้</h3>
+            <button id="tut-close" class="icon-btn" title="ปิด">✕</button>
+        </header>
+        <select id="tut-select" class="select"></select>
+        <div id="tut-content" class="tut-content"></div>
+        <div id="tut-status" class="tut-status"></div>
+        <div class="tut-actions">
+            <button id="tut-prev" class="btn ghost">← ก่อนหน้า</button>
+            <button id="tut-reset" class="btn ghost">เริ่มบทนี้ใหม่</button>
+            <button id="tut-next" class="btn">ถัดไป →</button>
+        </div>
+    </aside>
+
+    <!-- เมนูหลัก -->
+    <div id="menu" class="overlay">
+        <div class="modal">
+            <h1>♞ หมากรุกสามมิติ</h1>
+            <p class="sub">เกมหมากรุกสากล 3 มิติ เล่นผ่านเว็บเบราว์เซอร์</p>
+
+            <div class="field">
+                <label>โหมดการเล่น</label>
+                <div class="choices" id="choice-mode">
+                    <button class="choice selected" data-value="ai">🤖 เล่นกับคอมพิวเตอร์</button>
+                    <button class="choice" data-value="local">👥 เล่น 2 คน (ผลัดกันเดิน)</button>
+                    <button class="choice" data-value="tutorial">📘 โหมดเรียนรู้</button>
+                </div>
+            </div>
+
+            <div class="field" id="field-difficulty">
+                <label>ระดับความยาก</label>
+                <div class="choices" id="choice-difficulty">
+                    <button class="choice" data-value="1">มือใหม่</button>
+                    <button class="choice" data-value="2">ง่าย</button>
+                    <button class="choice selected" data-value="3">ปานกลาง</button>
+                    <button class="choice" data-value="4">ยาก</button>
+                    <button class="choice" data-value="5">ผู้เชี่ยวชาญ</button>
+                </div>
+            </div>
+
+            <div class="field" id="field-side">
+                <label>เลือกฝ่ายที่จะเล่น</label>
+                <div class="choices" id="choice-side">
+                    <button class="choice selected" data-value="w">♔ ฝ่ายขาว (เดินก่อน)</button>
+                    <button class="choice" data-value="b">♚ ฝ่ายดำ</button>
+                    <button class="choice" data-value="random">🎲 สุ่ม</button>
+                </div>
+            </div>
+
+            <details class="settings">
+                <summary>⚙️ ตั้งค่าเพิ่มเติม</summary>
+                <label class="check">
+                    <input type="checkbox" id="opt-show-moves" checked>
+                    แสดงช่องที่เดินได้เมื่อคลิกหมาก
+                </label>
+                <label class="check">
+                    <input type="checkbox" id="opt-limit" checked>
+                    จำกัดตาเดินช่วงท้ายเกม (กันเกมยืดเยื้อ)
+                </label>
+                <div class="limit-config">
+                    <label>เริ่มนับเมื่อหมากบนกระดานเหลือไม่เกิน
+                        <input type="number" id="opt-limit-threshold" min="3" max="16" value="6"> ตัว
+                    </label>
+                    <label>ให้เดินต่อได้อีก
+                        <input type="number" id="opt-limit-moves" min="5" max="100" value="30"> ตา แล้วตัดสินเสมอ
+                    </label>
+                </div>
+            </details>
+
+            <div class="modal-actions">
+                <button id="btn-start" class="btn primary big">เริ่มเกม</button>
+                <button id="btn-resume" class="btn ghost" hidden>เล่นต่อ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- เลือกหมากตอนเลื่อนขั้น -->
+    <div id="promo" class="overlay" hidden>
+        <div class="modal small">
+            <h2>เลื่อนขั้นเบี้ย</h2>
+            <p class="sub">เลือกหมากที่ต้องการ</p>
+            <div class="promo-choices" id="promo-choices"></div>
+        </div>
+    </div>
+
+    <!-- ผลการแข่งขัน -->
+    <div id="result" class="overlay" hidden>
+        <div class="modal small">
+            <h2 id="result-title">จบเกม</h2>
+            <p id="result-text" class="sub"></p>
+            <div class="modal-actions">
+                <button id="btn-rematch" class="btn primary">เล่นอีกครั้ง</button>
+                <button id="btn-result-menu" class="btn ghost">กลับเมนู</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="thinking" class="thinking" hidden>คอมพิวเตอร์กำลังคิด…</div>
+    <div id="toast" class="toast" hidden></div>
+
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>

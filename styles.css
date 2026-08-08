@@ -1,0 +1,701 @@
+:root {
+    --bg: #0a0c10;
+    --panel: rgba(18, 21, 28, 0.82);
+    --panel-solid: #12151c;
+    --border: rgba(255, 255, 255, 0.09);
+    --text: #e8ecf4;
+    --muted: #9aa3b4;
+    --accent: #d9a85a;
+    --accent-2: #54d4ff;
+    --good: #6ef58a;
+    --bad: #ff6b6b;
+    --radius: 14px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+#scene {
+    position: fixed;
+    inset: 0;
+}
+
+#scene canvas {
+    display: block;
+    touch-action: none;
+}
+
+/* ---------- แถบบน ---------- */
+#topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 18px;
+    background: linear-gradient(180deg, rgba(8, 10, 14, 0.92), rgba(8, 10, 14, 0));
+    z-index: 20;
+    pointer-events: none;
+}
+
+#topbar>* {
+    pointer-events: auto;
+}
+
+.brand {
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.3px;
+    color: var(--accent);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.turn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    backdrop-filter: blur(10px);
+}
+
+.turn .dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.turn.black .dot {
+    background: #23252c;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.turn.check {
+    border-color: var(--bad);
+    color: #ffd7d7;
+}
+
+.actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* ---------- ปุ่ม ---------- */
+.btn {
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text);
+    background: rgba(40, 46, 60, 0.85);
+    border: 1px solid var(--border);
+    padding: 9px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    backdrop-filter: blur(10px);
+}
+
+.btn:hover {
+    background: rgba(58, 66, 84, 0.95);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+}
+
+.btn.ghost {
+    background: rgba(20, 24, 32, 0.7);
+}
+
+.btn.primary {
+    background: linear-gradient(180deg, #e0b268, #c08c3c);
+    color: #23180a;
+    font-weight: 700;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn.primary:hover {
+    background: linear-gradient(180deg, #eec27a, #cf9a48);
+}
+
+.btn.big {
+    padding: 13px 30px;
+    font-size: 1.02rem;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.05rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.icon-btn:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- แถบข้าง ---------- */
+#sidebar {
+    position: fixed;
+    top: 68px;
+    right: 14px;
+    bottom: 14px;
+    width: 285px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 15;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 15px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+}
+
+.panel.grow {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 120px;
+}
+
+.panel h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.6px;
+    margin-bottom: 9px;
+    text-transform: uppercase;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    padding: 3px 0;
+}
+
+.stat-row span {
+    color: var(--muted);
+}
+
+.status-msg {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--accent-2);
+    min-height: 1.2em;
+}
+
+.status-msg.warn {
+    color: #ffd166;
+}
+
+.status-msg.bad {
+    color: var(--bad);
+}
+
+.captured-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.side-label {
+    font-size: 0.76rem;
+    color: var(--muted);
+    min-width: 62px;
+    padding-top: 3px;
+}
+
+.glyphs {
+    font-size: 1.35rem;
+    line-height: 1.15;
+    word-break: break-all;
+    color: #dfe5f0;
+}
+
+.move-list {
+    list-style: none;
+    overflow-y: auto;
+    flex: 1;
+    font-size: 0.84rem;
+    padding-right: 4px;
+}
+
+.move-list li {
+    padding: 5px 8px;
+    border-radius: 7px;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+}
+
+.move-list li:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.move-list li.latest {
+    background: rgba(217, 168, 90, 0.16);
+    outline: 1px solid rgba(217, 168, 90, 0.35);
+}
+
+.move-list .num {
+    color: var(--muted);
+    min-width: 26px;
+}
+
+.move-list .glyph {
+    font-size: 1.05rem;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 4px;
+}
+
+/* ---------- แผงบทเรียน ---------- */
+#tutorial-panel {
+    position: fixed;
+    top: 68px;
+    left: 14px;
+    bottom: 14px;
+    width: 330px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 16;
+}
+
+#tutorial-panel[hidden] {
+    display: none;
+}
+
+#tutorial-panel header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#tutorial-panel h3 {
+    font-size: 0.95rem;
+    color: var(--accent);
+}
+
+.select {
+    font-family: inherit;
+    font-size: 0.86rem;
+    color: var(--text);
+    background: rgba(12, 15, 20, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 10px;
+    width: 100%;
+}
+
+.tut-content {
+    overflow-y: auto;
+    flex: 1;
+    font-size: 0.87rem;
+    line-height: 1.65;
+    color: #d6dbe6;
+}
+
+.tut-content h4 {
+    margin-bottom: 6px;
+}
+
+.tut-content ul,
+.tut-content ol {
+    padding-left: 20px;
+    margin: 6px 0;
+}
+
+.tut-content li {
+    margin: 3px 0;
+}
+
+.tut-content p {
+    margin: 7px 0;
+}
+
+.tut-content code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1px 5px;
+    border-radius: 5px;
+    font-size: 0.85em;
+}
+
+.tut-content b {
+    color: #fff;
+}
+
+.tut-content .tip {
+    border-left: 3px solid var(--accent-2);
+    padding-left: 10px;
+    color: #b9dff0;
+}
+
+.tut-content .goal {
+    border-left: 3px solid var(--accent);
+    padding-left: 10px;
+    color: #f3d9a8;
+}
+
+.tut-status {
+    font-size: 0.86rem;
+    min-height: 1.3em;
+    color: var(--good);
+}
+
+.tut-status.fail {
+    color: var(--bad);
+}
+
+.tut-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.tut-actions .btn {
+    flex: 1;
+    padding: 9px 6px;
+    font-size: 0.82rem;
+}
+
+/* ---------- โมดัล ---------- */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 7, 11, 0.72);
+    backdrop-filter: blur(7px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.overlay[hidden] {
+    display: none;
+}
+
+.modal {
+    width: min(560px, 100%);
+    background: linear-gradient(180deg, #171b24, #10131a);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 26px 28px;
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6);
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+.modal.small {
+    width: min(400px, 100%);
+    text-align: center;
+}
+
+.modal h1 {
+    font-size: 1.6rem;
+    color: var(--accent);
+    text-align: center;
+}
+
+.modal h2 {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+}
+
+.modal .sub {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.field {
+    margin-bottom: 16px;
+}
+
+.field>label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 7px;
+}
+
+.choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.choice {
+    font-family: inherit;
+    font-size: 0.87rem;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex: 1 1 auto;
+}
+
+.choice:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.choice.selected {
+    background: rgba(217, 168, 90, 0.18);
+    border-color: var(--accent);
+    color: #f6dfb4;
+    font-weight: 600;
+}
+
+.settings {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.settings summary {
+    cursor: pointer;
+    font-size: 0.87rem;
+    color: var(--muted);
+}
+
+.check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.87rem;
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+.check input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--accent);
+}
+
+.limit-config {
+    margin-top: 10px;
+    padding-left: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.84rem;
+    color: var(--muted);
+}
+
+.limit-config input {
+    width: 66px;
+    font-family: inherit;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 5px 8px;
+    margin: 0 4px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.promo-choices {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.promo-choices button {
+    font-size: 2.4rem;
+    line-height: 1;
+    width: 74px;
+    height: 86px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: inherit;
+}
+
+.promo-choices button:hover {
+    background: rgba(217, 168, 90, 0.2);
+    border-color: var(--accent);
+}
+
+.promo-choices small {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+/* ---------- อื่น ๆ ---------- */
+.thinking {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    backdrop-filter: blur(10px);
+    z-index: 30;
+}
+
+.thinking::after {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 0.9s infinite ease-in-out;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.25;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.toast {
+    position: fixed;
+    bottom: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(24, 28, 38, 0.95);
+    border: 1px solid var(--border);
+    padding: 11px 22px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    z-index: 40;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 1000px) {
+    #sidebar {
+        width: 220px;
+    }
+
+    #tutorial-panel {
+        width: 290px;
+    }
+}
+
+@media (max-width: 760px) {
+    #topbar {
+        height: auto;
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .actions .btn {
+        padding: 7px 10px;
+        font-size: 0.78rem;
+    }
+
+    #sidebar {
+        top: auto;
+        right: 8px;
+        left: 8px;
+        bottom: 8px;
+        width: auto;
+        flex-direction: row;
+        max-height: 172px;
+    }
+
+    .panel {
+        flex: 1;
+        padding: 10px;
+    }
+
+    #tutorial-panel {
+        top: auto;
+        left: 8px;
+        right: 8px;
+        bottom: 190px;
+        width: auto;
+        max-height: 44vh;
+    }
+}
