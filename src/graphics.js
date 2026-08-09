@@ -8,6 +8,13 @@ import { fileOf, rankOf, squareIndex, WHITE } from './engine.js';
 const SQ = 1;
 const BOARD_TOP = 0.06;
 
+const MARBLE_VARIANTS = [
+    { color: 0xfffefa, roughness: 0.27, repeat: 1.05, rotation: 0.00, offset: [0.00, 0.00] },
+    { color: 0xf8f6f1, roughness: 0.31, repeat: 1.18, rotation: Math.PI * 0.50, offset: [0.19, 0.08] },
+    { color: 0xfdf9f2, roughness: 0.25, repeat: 1.12, rotation: Math.PI, offset: [0.07, 0.22] },
+    { color: 0xf4f6f7, roughness: 0.30, repeat: 1.24, rotation: Math.PI * 1.50, offset: [0.24, 0.15] }
+];
+
 const V2 = (x, y) => new THREE.Vector2(x, y);
 
 const PROFILES = {
@@ -137,6 +144,8 @@ export class Board3D {
         this.onPick = null;
         this.geoCache = {};
         this.animating = false;
+        this.marbleVariantByPiece = new WeakMap();
+        this.nextMarbleVariant = 0;
 
         this._initRenderer();
         this._initScene();
@@ -296,16 +305,48 @@ export class Board3D {
         this.markers = new THREE.Group();
         this.scene.add(this.markers);
 
+        this.marbleMaterials = MARBLE_VARIANTS.map((variant) => new THREE.MeshPhysicalMaterial({
+            color: variant.color,
+            roughness: variant.roughness,
+            metalness: 0.0,
+            clearcoat: 0.72,
+            clearcoatRoughness: 0.18,
+            envMapIntensity: 1.15
+        }));
+
         this.materials = {
-            w: new THREE.MeshPhysicalMaterial({
-                color: 0xfffdf7, roughness: 0.28, metalness: 0.0, clearcoat: 0.6, clearcoatRoughness: 0.22,
-                sheen: 0.5, sheenColor: new THREE.Color(0xfffaf0), envMapIntensity: 1.25
-            }),
+            w: this.marbleMaterials[0],
             b: new THREE.MeshPhysicalMaterial({
                 color: 0x0e0f13, roughness: 0.22, metalness: 0.12, clearcoat: 0.95, clearcoatRoughness: 0.08,
                 envMapIntensity: 0.85
             })
         };
+
+        const marbleUrl = new URL('../assets/textures/white-carrara-marble.png', import.meta.url);
+        new THREE.TextureLoader().load(
+            marbleUrl.href,
+            (source) => {
+                const maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy();
+                source.colorSpace = THREE.SRGBColorSpace;
+
+                this.marbleMaterials.forEach((material, index) => {
+                    const variant = MARBLE_VARIANTS[index];
+                    const texture = index === 0 ? source : source.clone();
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.setScalar(variant.repeat);
+                    texture.center.set(0.5, 0.5);
+                    texture.rotation = variant.rotation;
+                    texture.offset.set(...variant.offset);
+                    texture.anisotropy = Math.min(8, maxAnisotropy);
+                    texture.needsUpdate = true;
+                    material.map = texture;
+                    material.needsUpdate = true;
+                });
+            },
+            undefined,
+            (error) => console.warn('Unable to load the white marble texture.', error)
+        );
 
         this.selectMat = new THREE.MeshBasicMaterial({ color: 0x54d4ff, transparent: true, opacity: 0.62, depthWrite: false });
         this.moveMat = new THREE.MeshBasicMaterial({ color: 0x5ff77f, transparent: true, opacity: 0.8, depthWrite: false });
@@ -358,8 +399,18 @@ export class Board3D {
         return this.geoCache[type];
     }
 
+    _materialForPiece(piece) {
+        if (piece.color !== WHITE) return this.materials.b;
+
+        if (!this.marbleVariantByPiece.has(piece)) {
+            this.marbleVariantByPiece.set(piece, this.nextMarbleVariant);
+            this.nextMarbleVariant = (this.nextMarbleVariant + 1) % this.marbleMaterials.length;
+        }
+        return this.marbleMaterials[this.marbleVariantByPiece.get(piece)];
+    }
+
     _createPiece(piece, square) {
-        const mesh = new THREE.Mesh(this._geometry(piece.type), this.materials[piece.color]);
+        const mesh = new THREE.Mesh(this._geometry(piece.type), this._materialForPiece(piece));
         const p = this.squareToWorld(square);
         mesh.position.set(p.x, BOARD_TOP, p.z);
         mesh.castShadow = true;
