@@ -6,6 +6,7 @@ import {
 import { DIFFICULTY } from './src/ai.js';
 import { Board3D } from './src/graphics.js';
 import { LESSONS } from './src/tutorial.js';
+import { SoundFX } from './src/audio.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -36,6 +37,23 @@ game.keyCounts.set(game.positionKey(), 1);
 
 const board = new Board3D($('scene'));
 board.onPick = onSquarePicked;
+
+const sfx = new SoundFX();
+sfx.setEnabled(localStorage.getItem('chess3d.sound') !== 'off');
+updateSoundButton();
+
+$('btn-sound').addEventListener('click', () => {
+    sfx.setEnabled(!sfx.enabled);
+    localStorage.setItem('chess3d.sound', sfx.enabled ? 'on' : 'off');
+    updateSoundButton();
+    if (sfx.enabled) sfx.play('select');
+});
+
+function updateSoundButton() {
+    const btn = $('btn-sound');
+    btn.textContent = sfx.enabled ? '\u{1F50A} เสียง' : '\u{1F507} ปิดเสียง';
+    btn.title = sfx.enabled ? 'ปิดเสียงประกอบ' : 'เปิดเสียงประกอบ';
+}
 
 /* ---------------- เอนจินคอมพิวเตอร์ (Web Worker + สำรอง) ---------------- */
 
@@ -134,6 +152,7 @@ $('btn-result-menu').addEventListener('click', () => {
 function startGame() {
     $('menu').hidden = true;
     $('result').hidden = true;
+    sfx.unlock();
     state.started = true;
     state.over = false;
     state.selected = -1;
@@ -211,6 +230,7 @@ function onSquarePicked(square) {
         state.selected = square;
         state.legalForSelected = game.moves({ square });
         state.hint = null;
+        sfx.play('select');
     } else {
         state.selected = -1;
         state.legalForSelected = [];
@@ -269,6 +289,7 @@ function playMove(move) {
     updateLimit();
 
     board.animateMove(move, game.board, () => {
+        playMoveSound(move);
         refreshHighlights();
         updateHud();
         const finished = checkGameEnd();
@@ -279,6 +300,15 @@ function playMove(move) {
     });
     refreshHighlights();
     updateHud();
+}
+
+function playMoveSound(move) {
+    const lostOwnPiece = move.captured && state.mode === 'ai' && move.color !== state.playerColor;
+    if (move.promotion) sfx.play('promote');
+    else if (move.flag === 'castleK' || move.flag === 'castleQ') sfx.play('castle');
+    else if (move.captured) sfx.play(lostOwnPiece ? 'lost' : 'capture');
+    else sfx.play('move');
+    if (game.inCheck(game.turn) && game.moves().length > 0) setTimeout(() => sfx.play('check'), 190);
 }
 
 async function computerMove() {
@@ -302,6 +332,7 @@ async function computerMove() {
 
 function undo() {
     if (state.thinking || board.animating || !game.history.length) return;
+    sfx.play('undo');
     const steps = (state.mode === 'ai' && game.history.length >= 2) ? 2 : 1;
     for (let i = 0; i < steps; i++) game.undoMove();
     moveRecords.length = Math.max(0, moveRecords.length - steps);
@@ -381,8 +412,13 @@ const RESULT_TEXT = {
 function finish(winner, reason) {
     state.over = true;
     if (state.mode === 'tutorial') {
-        if (reason === 'checkmate') setTutorialStatus(`🎉 รุกฆาตสำเร็จ! ${COLOR_TH[winner]}ชนะ`, false);
-        else setTutorialStatus(RESULT_TEXT[reason] || 'จบบทเรียน', true);
+        if (reason === 'checkmate') {
+            sfx.play('win');
+            setTutorialStatus(`🎉 รุกฆาตสำเร็จ! ${COLOR_TH[winner]}ชนะ`, false);
+        } else {
+            sfx.play('draw');
+            setTutorialStatus(RESULT_TEXT[reason] || 'จบบทเรียน', true);
+        }
         updateHud();
         return;
     }
@@ -391,9 +427,11 @@ function finish(winner, reason) {
         const isPlayer = state.mode === 'ai' && winner === state.playerColor;
         title = state.mode === 'ai' ? (isPlayer ? '🏆 คุณชนะ!' : '😢 คุณแพ้') : `🏆 ${COLOR_TH[winner]}ชนะ`;
         text = `${RESULT_TEXT.checkmate} ${COLOR_TH[winner]}เป็นฝ่ายชนะ`;
+        sfx.play(state.mode === 'ai' && !isPlayer ? 'lose' : 'win');
     } else {
         title = '🤝 เสมอ';
         text = RESULT_TEXT[reason] || 'เกมจบลงด้วยผลเสมอ';
+        sfx.play('draw');
     }
     $('result-title').textContent = title;
     $('result-text').textContent = text;
