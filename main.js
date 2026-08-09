@@ -1,14 +1,13 @@
 // ตัวควบคุมเกมหลัก: เชื่อมกติกา (engine) เข้ากับฉาก 3D และหน้าจอผู้ใช้ภาษาไทย
 import {
-    Chess, WHITE, BLACK, START_FEN, PIECE_TH, PIECE_GLYPH, COLOR_TH, toAlgebraic
+    Chess, WHITE, BLACK, START_FEN, PIECE_TH, PIECE_EN, PIECE_MOVE_TH, PIECE_POINTS,
+    PIECE_GLYPH, COLOR_TH, toAlgebraic
 } from './src/engine.js';
 import { DIFFICULTY } from './src/ai.js';
 import { Board3D } from './src/graphics.js';
 import { LESSONS } from './src/tutorial.js';
 
 const $ = (id) => document.getElementById(id);
-
-const PIECE_VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 
 const state = {
     mode: 'ai',              // 'ai' | 'local' | 'tutorial'
@@ -178,6 +177,7 @@ function resetTo(fen) {
     state.limitStartPly = null;
     board.syncBoard(game.board);
     updateLimit();
+    hidePieceInfo();
     refreshHighlights();
     renderMoveList();
     updateHud();
@@ -215,7 +215,28 @@ function onSquarePicked(square) {
         state.selected = -1;
         state.legalForSelected = [];
     }
+    showPieceInfo(piece, square);
     refreshHighlights();
+}
+
+/** แถบบอกชื่อหมากที่คลิก ช่วยมือใหม่จำชื่อและวิธีเดิน */
+function showPieceInfo(piece, square) {
+    const el = $('piece-info');
+    if (!piece) { el.hidden = true; return; }
+    const t = piece.type;
+    const movable = piece.color === game.turn && canControl(piece.color);
+    const count = movable ? game.moves({ square }).length : -1;
+    $('pi-glyph').textContent = PIECE_GLYPH[piece.color][t];
+    $('pi-name').innerHTML = `${PIECE_TH[t]} <span class="en">(${PIECE_EN[t]})</span>` +
+        ` · ${COLOR_TH[piece.color]} · ${toAlgebraic(square)}` +
+        (PIECE_POINTS[t] ? ` <span class="pts">· ≈ ${PIECE_POINTS[t]} แต้ม</span>` : '');
+    $('pi-desc').textContent = PIECE_MOVE_TH[t] +
+        (count === 0 ? ' — ตอนนี้เดินไม่ได้' : count > 0 ? ` — ตอนนี้เดินได้ ${count} ช่อง` : '');
+    el.hidden = false;
+}
+
+function hidePieceInfo() {
+    $('piece-info').hidden = true;
 }
 
 function askPromotion(candidates) {
@@ -240,6 +261,7 @@ function playMove(move) {
     state.selected = -1;
     state.legalForSelected = [];
     state.hint = null;
+    hidePieceInfo();
 
     game.makeMove(move);
     state.lastMove = { from: move.from, to: move.to };
@@ -262,6 +284,7 @@ function playMove(move) {
 async function computerMove() {
     if (state.over || state.mode !== 'ai') return;
     state.thinking = true;
+    hidePieceInfo();
     $('thinking').hidden = false;
     const cfg = DIFFICULTY[state.difficulty];
     const found = await requestMove(game.fen(), cfg);
@@ -298,6 +321,7 @@ function undo() {
 async function showHint() {
     if (state.over || state.thinking || board.animating) return;
     if (state.mode === 'ai' && game.turn !== state.playerColor) return;
+    hidePieceInfo();
     $('thinking').hidden = false;
     state.thinking = true;
     const found = await requestMove(game.fen(), { depth: 3, timeMs: 2000, quiescence: true });
@@ -481,7 +505,7 @@ function updateCaptured() {
         for (const t of ['q', 'r', 'b', 'n', 'p']) {
             const lost = Math.max(0, start[t] - alive[color][t]);
             out += PIECE_GLYPH[color][t].repeat(lost);
-            score += lost * PIECE_VALUE[t];
+            score += lost * PIECE_POINTS[t];
         }
         return { out, score };
     };
@@ -571,6 +595,7 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         state.selected = -1;
         state.legalForSelected = [];
+        hidePieceInfo();
         refreshHighlights();
     }
     if (e.key.toLowerCase() === 'u') undo();

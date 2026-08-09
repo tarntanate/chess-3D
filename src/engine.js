@@ -5,6 +5,16 @@ export const BLACK = 'b';
 export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 export const PIECE_TH = { p: 'เบี้ย', n: 'ม้า', b: 'บิชอป', r: 'เรือ', q: 'ควีน', k: 'ขุน' };
+export const PIECE_EN = { p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King' };
+export const PIECE_MOVE_TH = {
+    p: 'เดินหน้าครั้งละ 1 ช่อง (ตาแรกเดิน 2 ช่องได้) แต่กินแนวทแยงเท่านั้น',
+    n: 'เดินเป็นรูปตัว L (ตรง 2 แล้วเลี้ยว 1) กระโดดข้ามตัวอื่นได้',
+    b: 'เดินแนวทแยงได้ไกล อยู่บนช่องสีเดิมตลอดเกม',
+    r: 'เดินแนวตรง ขึ้น-ลง-ซ้าย-ขวา ได้ไกล ใช้เข้าป้อมกับขุนได้',
+    q: 'เดินได้ทั้งแนวตรงและแนวทแยง แข็งแกร่งที่สุด',
+    k: 'เดินได้ทุกทิศ ครั้งละ 1 ช่อง ห้ามเดินเข้าช่องที่ถูกโจมตี'
+};
+export const PIECE_POINTS = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 export const PIECE_GLYPH = {
     w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' },
     b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚' }

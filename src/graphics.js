@@ -159,7 +159,7 @@ export class Board3D {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.05;
+        this.renderer.toneMappingExposure = 0.92;
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.container.appendChild(this.renderer.domElement);
     }
@@ -189,10 +189,10 @@ export class Board3D {
     }
 
     _initLights() {
-        const hemi = new THREE.HemisphereLight(0xdfe9ff, 0x20222a, 0.55);
+        const hemi = new THREE.HemisphereLight(0xdfe9ff, 0x20222a, 0.4);
         this.scene.add(hemi);
 
-        const key = new THREE.DirectionalLight(0xfff2dd, 2.6);
+        const key = new THREE.DirectionalLight(0xfff2dd, 2.0);
         key.position.set(6, 12, 7);
         key.castShadow = true;
         key.shadow.mapSize.set(2048, 2048);
@@ -212,7 +212,7 @@ export class Board3D {
         rim.position.set(-8, 6, -7);
         this.scene.add(rim);
 
-        const fill = new THREE.PointLight(0xffd9a0, 28, 24, 2);
+        const fill = new THREE.PointLight(0xffd9a0, 18, 24, 2);
         fill.position.set(-4, 5, 5);
         this.scene.add(fill);
     }
@@ -232,7 +232,7 @@ export class Board3D {
         const group = new THREE.Group();
 
         const frameMat = new THREE.MeshPhysicalMaterial({
-            color: 0x3a2416, roughness: 0.32, metalness: 0.15, clearcoat: 0.85, clearcoatRoughness: 0.15, envMapIntensity: 1.0
+            color: 0x2b1a10, roughness: 0.35, metalness: 0.15, clearcoat: 0.85, clearcoatRoughness: 0.18, envMapIntensity: 0.9
         });
         const frame = new THREE.Mesh(new THREE.BoxGeometry(9.4, 0.44, 9.4), frameMat);
         frame.position.y = -0.22 + BOARD_TOP - 0.06;
@@ -241,10 +241,10 @@ export class Board3D {
         group.add(frame);
 
         const lightMat = new THREE.MeshPhysicalMaterial({
-            color: 0xe8d9bd, roughness: 0.18, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.08, envMapIntensity: 1.1
+            color: 0x9a7048, roughness: 0.42, metalness: 0.0, clearcoat: 0.3, clearcoatRoughness: 0.3, envMapIntensity: 0.5
         });
         const darkMat = new THREE.MeshPhysicalMaterial({
-            color: 0x53341f, roughness: 0.2, metalness: 0.05, clearcoat: 1.0, clearcoatRoughness: 0.1, envMapIntensity: 1.1
+            color: 0x38200f, roughness: 0.45, metalness: 0.05, clearcoat: 0.3, clearcoatRoughness: 0.32, envMapIntensity: 0.5
         });
 
         const squareGeo = new THREE.BoxGeometry(SQ, 0.06, SQ);
@@ -298,8 +298,8 @@ export class Board3D {
 
         this.materials = {
             w: new THREE.MeshPhysicalMaterial({
-                color: 0xf3ece0, roughness: 0.24, metalness: 0.02, clearcoat: 0.7, clearcoatRoughness: 0.18,
-                sheen: 0.4, sheenColor: new THREE.Color(0xfff6e8), envMapIntensity: 1.15
+                color: 0xfffdf7, roughness: 0.28, metalness: 0.0, clearcoat: 0.6, clearcoatRoughness: 0.22,
+                sheen: 0.5, sheenColor: new THREE.Color(0xfffaf0), envMapIntensity: 1.25
             }),
             b: new THREE.MeshPhysicalMaterial({
                 color: 0x0e0f13, roughness: 0.22, metalness: 0.12, clearcoat: 0.95, clearcoatRoughness: 0.08,
@@ -307,12 +307,12 @@ export class Board3D {
             })
         };
 
-        this.selectMat = new THREE.MeshBasicMaterial({ color: 0x54d4ff, transparent: true, opacity: 0.5, depthWrite: false });
-        this.moveMat = new THREE.MeshBasicMaterial({ color: 0x6ef58a, transparent: true, opacity: 0.55, depthWrite: false });
-        this.captureMat = new THREE.MeshBasicMaterial({ color: 0xff6b6b, transparent: true, opacity: 0.55, depthWrite: false });
-        this.lastMat = new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.35, depthWrite: false });
-        this.checkMat = new THREE.MeshBasicMaterial({ color: 0xff2d55, transparent: true, opacity: 0.55, depthWrite: false });
-        this.hintMat = new THREE.MeshBasicMaterial({ color: 0xb794ff, transparent: true, opacity: 0.6, depthWrite: false });
+        this.selectMat = new THREE.MeshBasicMaterial({ color: 0x54d4ff, transparent: true, opacity: 0.62, depthWrite: false });
+        this.moveMat = new THREE.MeshBasicMaterial({ color: 0x5ff77f, transparent: true, opacity: 0.8, depthWrite: false });
+        this.captureMat = new THREE.MeshBasicMaterial({ color: 0xff5252, transparent: true, opacity: 0.8, depthWrite: false });
+        this.lastMat = new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.42, depthWrite: false });
+        this.checkMat = new THREE.MeshBasicMaterial({ color: 0xff2d55, transparent: true, opacity: 0.62, depthWrite: false });
+        this.hintMat = new THREE.MeshBasicMaterial({ color: 0xc39bff, transparent: true, opacity: 0.75, depthWrite: false });
 
         this.dotGeo = new THREE.CircleGeometry(0.17, 32);
         this.ringGeo = new THREE.RingGeometry(0.35, 0.46, 40);

@@ -615,6 +615,57 @@ body {
     z-index: 30;
 }
 
+.piece-info {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: min(520px, calc(100vw - 40px));
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 10px 20px 10px 16px;
+    border-radius: 14px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+    z-index: 29;
+}
+
+.piece-info[hidden] {
+    display: none;
+}
+
+.pi-glyph {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.pi-name {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.pi-name .en {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 0.85rem;
+}
+
+.pi-name .pts {
+    color: var(--accent);
+    font-size: 0.8rem;
+    margin-left: 6px;
+}
+
+.pi-desc {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
 .thinking::after {
     content: "";
     display: inline-block;
